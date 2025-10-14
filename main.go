@@ -21,6 +21,13 @@ func main() {
 		ReaderTakerID:0,
 	}
 
+
 	fmt.Println(book1)
+	book1.IssueBook(user1)
+	fmt.Println(book1)
+
+	user1.Deactive()
+	fmt.Println(user1)
+	fmt.Println("---")
 	book1.IssueBook(user1)
 }
