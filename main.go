@@ -29,4 +29,13 @@ func main() {
 	fmt.Println(user1)
 	fmt.Println("---")
 	book1.IssueBook(user1)
+
+	Slice_notifer:=[]Notifer{}
+	email:=EmailNotifier{EmailAddress:"kostik290820077@gmail.com"}
+	phone:=SMSNotifier{PhoneNumber:"+79187025870"}
+
+	Slice_notifer = append(Slice_notifer,email, phone)
+	for i:=0;i<len(Slice_notifer);i++{
+		Slice_notifer[i].Notify("Ваша книга просрочена!")
+	}
 }
