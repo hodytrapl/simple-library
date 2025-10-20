@@ -3,39 +3,22 @@ package main
 import "fmt"
 
 func main() {
-	iduser1 := 1
-	user1 := &Reader{
-		ID:        &iduser1,
-		FirstName: "g",
-		LastName:  "gg",
-		isActive:  true,
-	}
-	fmt.Println(user1)
+	fmt.Println("Запуск системы управления библиотекой...")
 
-	book1 := &Book{
-		ID:            1,
-		Title:         "война и мир",
-		Year:          1985,
-		Author:        "tolstoy",
-		isIssue:       false,
-		ReaderTakerID: 0,
-	}
+	myLibrary := &Library{}
 
-	fmt.Println(book1)
-	book1.IssueBook(user1)
-	fmt.Println(book1)
+	fmt.Println("\n--- Наполняем библиотеку ---")
 
-	user1.Deactive()
-	fmt.Println(user1)
-	fmt.Println("---")
-	book1.IssueBook(user1)
+	myLibrary.AddReader("Агунда", "Кокойты")
+	myLibrary.AddReader("Сергей", "Меняйло")
 
-	Slice_notifer:=[]Notifer{}
-	email:=EmailNotifier{EmailAddress:"kostik290820077@gmail.com"}
-	phone:=SMSNotifier{PhoneNumber:"+79187025870"}
+	myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
+	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
 
-	Slice_notifer = append(Slice_notifer,email, phone)
-	for i:=0;i<len(Slice_notifer);i++{
-		Slice_notifer[i].Notify("Ваша книга просрочена!")
-	}
+	fmt.Println("\n--- Библиотека готова к работе ---")
+	fmt.Println("Количество читателей:", len(myLibrary.Readers))
+	fmt.Println("Количество книг:", len(myLibrary.Books))
+
+	myLibrary.ListAllBooks();
+
 }

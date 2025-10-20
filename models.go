@@ -40,9 +40,52 @@ func (r *Reader) AssignBook(b *Book) {
 }
 
 type Library struct {
-	Books   map[int]*Book
-	Readers map[int]*Reader
+	Books   []*Book
+    Readers []*Reader
+
+	lastBookID   int
+    lastReaderID int
+
 }
+
+func (lib *Library) AddReader(firstName, lastName string) *Reader {
+    lib.lastReaderID++
+    
+    newReader := &Reader{
+        ID:        &lib.lastReaderID,
+        FirstName: firstName,
+        LastName:  lastName,
+        isActive:  true,
+    }
+
+    lib.Readers = append(lib.Readers, newReader)
+
+    fmt.Printf("Зарегистрирован новый читатель: %s\n", newReader)
+    return newReader
+}
+func (lib *Library) AddBook(title, author string, year int) *Book {
+    lib.lastBookID++
+
+    newBook := &Book{
+        ID:       lib.lastBookID,
+        Title:    title,
+        Author:   author,
+        Year:     year,
+        isIssue: false,
+    }
+
+    lib.Books = append(lib.Books, newBook)
+
+    fmt.Printf("Добавлена новая книга: %s\n", newBook)
+    return newBook
+}
+
+func (lib *Library) ListAllBooks(){
+	for _, book :=range lib.Books{
+		fmt.Println(book.String())
+	}	
+}
+
 
 type Book struct {
 	ID            int
