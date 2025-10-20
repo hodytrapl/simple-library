@@ -21,4 +21,20 @@ func main() {
 
 	myLibrary.ListAllBooks();
 
+	fmt.Println("---Тестируем выдачу книг---")
+	err := myLibrary.IssueBookToReader(1, 1)
+	if err != nil {
+		fmt.Println("Ошибка выдачи", err)
+	}
+
+	book, _ := myLibrary.FindBookByID(1)
+	if book != nil {
+		fmt.Println("Статус книги после выдачи:", book)
+	}
+
+	err = myLibrary.IssueBookToReader(99, 1)
+	if err != nil {
+		fmt.Println("Ожидаемая ошибка:", err)
+	}
+
 }
