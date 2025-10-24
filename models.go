@@ -4,84 +4,87 @@ import "fmt"
 
 type Library struct {
 	Books   []*Book
-    Readers []*Reader
+	Readers []*Reader
 
 	lastBookID   int
-    lastReaderID int
-
+	lastReaderID int
 }
 
 func (lib *Library) AddReader(firstName, lastName string) *Reader {
-    lib.lastReaderID++
-    
-    newReader := &Reader{
-        ID:        &lib.lastReaderID,
-        FirstName: firstName,
-        LastName:  lastName,
-        isActive:  true,
-    }
+	lib.lastReaderID++
 
-    lib.Readers = append(lib.Readers, newReader)
+	newReader := &Reader{
+		ID:        &lib.lastReaderID,
+		FirstName: firstName,
+		LastName:  lastName,
+		isActive:  true,
+	}
 
-    fmt.Printf("Зарегистрирован новый читатель: %s\n", newReader)
-    return newReader
+	lib.Readers = append(lib.Readers, newReader)
+	return newReader
 }
 func (lib *Library) AddBook(title, author string, year int) *Book {
-    lib.lastBookID++
+	lib.lastBookID++
 
-    newBook := &Book{
-        ID:       lib.lastBookID,
-        Title:    title,
-        Author:   author,
-        Year:     year,
-        isIssue: false,
-    }
+	newBook := &Book{
+		ID:      lib.lastBookID,
+		Title:   title,
+		Author:  author,
+		Year:    year,
+		isIssue: false,
+	}
 
-    lib.Books = append(lib.Books, newBook)
+	lib.Books = append(lib.Books, newBook)
 
-    fmt.Printf("Добавлена новая книга: %s\n", newBook)
-    return newBook
+	return newBook
 }
 
-func (lib *Library) ListAllBooks(){
-	for _, book :=range lib.Books{
+func (lib *Library) ListAllBooks() {
+	for _, book := range lib.Books {
 		fmt.Println(book.String())
-	}	
+	}
 }
 
-
-func (lib *Library) FindBookByID(id int) (*Book, error){
-	for _, book :=range lib.Books{
-		if book.ID==id{
-			return book,nil
+func (lib *Library) FindBookByID(id int) (*Book, error) {
+	for _, book := range lib.Books {
+		if book.ID == id {
+			return book, nil
 		}
 	}
-	return nil,fmt.Errorf("книга с ID %d не найдена", id)
+	return nil, fmt.Errorf("книга с ID %d не найдена", id)
 }
 
-func (lib *Library) FindReaderByID(id int) (*Reader, error){
-	for _, reader :=range lib.Readers{
-		if *reader.ID==id{
-			return reader,nil
+func (lib *Library) FindReaderByID(id int) (*Reader, error) {
+	for _, reader := range lib.Readers {
+		if *reader.ID == id {
+			return reader, nil
 		}
 	}
-	return nil,fmt.Errorf("читатель с ID %d не найдена", id)
+	return nil, fmt.Errorf("читатель с ID %d не найдена", id)
 }
 
-func (lib *Library) IssueBookToReader(bookID int, readerID int) error{
-	book_result, err:=lib.FindBookByID(bookID);
-	if (err!=nil){
-		return err;
+func (lib *Library) IssueBookToReader(bookID int, readerID int) error {
+	book_result, err := lib.FindBookByID(bookID)
+	if err != nil {
+		return err
 	}
-	reader_result, err:=lib.FindReaderByID(readerID);
+	reader_result, err := lib.FindReaderByID(readerID)
 
-	if (err!=nil){
-		return err;
+	if err != nil {
+		return err
 	}
-	book_result.IssueBook(reader_result)
-	return nil
+	
+	return book_result.IssueBook(reader_result)
 }
 
+func (lib *Library) ReturnBook(bookid int) error{
+	book, err := lib.FindBookByID(bookid)
+	if err != nil {
+		return err
+	}
+	
+	return book.ReturnBook()
+}
 
 type Reader struct {
 	ID        *int
@@ -90,34 +93,34 @@ type Reader struct {
 	isActive  bool
 }
 
-func (r Reader) DisplayReader() {
-	fmt.Printf("читатель:%s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
-}
 
-func (r *Reader) Deactive() {
+
+func (r *Reader) Deactive() error {
+	if !r.isActive {
+		return fmt.Errorf("читатель %s %s уже неактивен", r.FirstName, r.LastName)
+	}
 	r.isActive = false
+	return nil
 }
 
 func (r Reader) String() string {
-	status := ""
-	if r.isActive {
-		status = "active"
-	} else {
-		status = "noactive"
+	status := "активен"
+	if !r.isActive {
+		status = "неактивен"
 	}
-	return fmt.Sprintf("пользователь %s %s, id: %d, %s\n", r.FirstName, r.LastName, r.ID, status)
+	return fmt.Sprintf("Читатель: %s %s (ID: %d, статус: %s)", r.FirstName, r.LastName, r.ID, status)
 }
 
-func (r *Reader) AssignBook(b *Book) {
+
+func (r *Reader) AssignBook(b *Book) error {
 	if !b.isIssue {
-		fmt.Printf("Книга '%s' не выдана\n", b.Title)
-		return
+		return fmt.Errorf("Книга '%s' не выдана\n", b.Title)
 	}
 	if b.ReaderTakerID != *r.ID {
-		fmt.Printf("Книга '%s' не выдана ему\n", b.Title)
-		return
+		
+		return fmt.Errorf("Книга '%s' не выдана ему\n", b.Title)
 	}
-	fmt.Printf("Читатель %s %s взял книгу '%s' (%s, %d)\n", r.FirstName, r.LastName, b.Title, b.Author, b.Year)
+	return fmt.Errorf("Читатель %s %s взял книгу '%s' (%s, %d)\n", r.FirstName, r.LastName, b.Title, b.Author, b.Year)
 }
 
 type Book struct {
@@ -130,34 +133,35 @@ type Book struct {
 }
 
 func (b Book) String() string {
-	return fmt.Sprintf("%s (%s, %d) \n", b.Title, b.Author, b.Year)
-}
-func (b *Book) IssueBook(reader *Reader) {
+	status := "в библиотеке"
 	if b.isIssue {
-		fmt.Printf("Книга %s уже используется\n", b.Title)
-		return
+		status = fmt.Sprintf("выдана читателю ID: %d", b.ReaderTakerID)
+	}
+	return fmt.Sprintf("Книга: %s (%s, %d) - %s", b.Title, b.Author, b.Year, status)
+}
+
+func (b *Book) IssueBook(reader *Reader) error {
+	if b.isIssue {	
+		return fmt.Errorf("Книга %s уже используется\n", b.Title)
 	}
 	if !reader.isActive {
-		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
-		return
+		return fmt.Errorf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 
-	if reader.ID == nil {
-		fmt.Printf("У читателя %s %s не указан ID\n", reader.FirstName, reader.LastName)
-		return
+	if reader.ID == nil {		
+		return fmt.Errorf("У читателя %s %s не указан ID\n", reader.FirstName, reader.LastName)
 	}
 
 	b.isIssue = true
 	b.ReaderTakerID = *reader.ID
-	fmt.Printf("Книга %s была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+	return fmt.Errorf("Книга %s была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
 }
 
-func (b *Book) ReturnBook() {
-	if !b.isIssue {
-		fmt.Printf("Книга %s и так в библиотеке", b.Title)
-		return
+func (b *Book) ReturnBook() error {
+	if !b.isIssue {		
+		return fmt.Errorf("Книга %s и так в библиотеке", b.Title)
 	}
 	b.isIssue = false
 	b.ReaderTakerID = 0
-	fmt.Printf("Книга %s возвращена в библиотеку\n", b.Title)
+	return nil
 }
