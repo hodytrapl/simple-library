@@ -73,16 +73,16 @@ func (lib *Library) IssueBookToReader(bookID int, readerID int) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return book_result.IssueBook(reader_result)
 }
 
-func (lib *Library) ReturnBook(bookid int) error{
+func (lib *Library) ReturnBook(bookid int) error {
 	book, err := lib.FindBookByID(bookid)
 	if err != nil {
 		return err
 	}
-	
+
 	return book.ReturnBook()
 }
 
@@ -93,7 +93,27 @@ type Reader struct {
 	isActive  bool
 }
 
+func (lib *Library) saveLibrary(booksFileName string) error {
+	if err := SaveBooksToCSV(lib.Books, booksFileName); err != nil {
+		return fmt.Errorf("ошибка сохранения книг: %v", err)
+	}
 
+	fmt.Printf("Данные успешно сохранены:\n- Книги: %s\n", booksFileName)
+	return nil
+}
+
+func (lib *Library) LoadLibrary(booksFileName string) error {
+	books, maxBookID, err := LoadBooksFromCSV(booksFilename)
+	if err != nil {
+		return fmt.Errorf("ошибка загрузки книг: %v", err)
+	}
+
+	lib.Books = books
+	lib.lastBookID = maxBookID
+
+	fmt.Printf("Данные успешно загружены:\n- Книги: %s\n", booksFileName)
+	return nil
+}
 
 func (r *Reader) Deactive() error {
 	if !r.isActive {
@@ -111,13 +131,12 @@ func (r Reader) String() string {
 	return fmt.Sprintf("Читатель: %s %s (ID: %d, статус: %s)", r.FirstName, r.LastName, r.ID, status)
 }
 
-
 func (r *Reader) AssignBook(b *Book) error {
 	if !b.isIssue {
 		return fmt.Errorf("Книга '%s' не выдана\n", b.Title)
 	}
 	if b.ReaderTakerID != *r.ID {
-		
+
 		return fmt.Errorf("Книга '%s' не выдана ему\n", b.Title)
 	}
 	return fmt.Errorf("Читатель %s %s взял книгу '%s' (%s, %d)\n", r.FirstName, r.LastName, b.Title, b.Author, b.Year)
@@ -141,14 +160,14 @@ func (b Book) String() string {
 }
 
 func (b *Book) IssueBook(reader *Reader) error {
-	if b.isIssue {	
+	if b.isIssue {
 		return fmt.Errorf("Книга %s уже используется\n", b.Title)
 	}
 	if !reader.isActive {
 		return fmt.Errorf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 
-	if reader.ID == nil {		
+	if reader.ID == nil {
 		return fmt.Errorf("У читателя %s %s не указан ID\n", reader.FirstName, reader.LastName)
 	}
 
@@ -158,7 +177,7 @@ func (b *Book) IssueBook(reader *Reader) error {
 }
 
 func (b *Book) ReturnBook() error {
-	if !b.isIssue {		
+	if !b.isIssue {
 		return fmt.Errorf("Книга %s и так в библиотеке", b.Title)
 	}
 	b.isIssue = false
