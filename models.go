@@ -103,7 +103,7 @@ func (lib *Library) saveLibrary(booksFileName string) error {
 }
 
 func (lib *Library) LoadLibrary(booksFileName string) error {
-	books, maxBookID, err := LoadBooksFromCSV(booksFilename)
+	books, maxBookID, err := LoadBooksFromCSV(booksFileName)
 	if err != nil {
 		return fmt.Errorf("ошибка загрузки книг: %v", err)
 	}
